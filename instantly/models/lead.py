@@ -52,13 +52,13 @@ class LeadUpdateRequest(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     company_name: Optional[str] = None
-    company_domain: Optional[str] = None
     website: Optional[str] = None
     phone: Optional[str] = None
     personalization: Optional[str] = None
-    campaign: Optional[UUID] = None
-    list_id: Optional[UUID] = None
     assigned_to: Optional[UUID] = None
+    lt_interest_status: Optional[int] = None  # See API docs for enum values
+    pl_value_lead: Optional[str] = None
+    custom_variables: Optional[Dict[str, Any]] = None
 
 class LeadMergeRequest(BaseModel):
     primary_lead_id: str
