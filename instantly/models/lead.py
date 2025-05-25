@@ -95,8 +95,8 @@ class Lead(BaseModel):
     timestamp_created: datetime
     timestamp_updated: datetime
     organization: UUID
-    campaign: UUID
-    status: int
+    campaign: Optional[UUID] = None
+    status: Optional[int] = None
     email: str
     personalization: Optional[str] = None
     website: Optional[str] = None
@@ -104,9 +104,9 @@ class Lead(BaseModel):
     first_name: Optional[str] = None
     company_name: Optional[str] = None
     phone: Optional[str] = None
-    email_open_count: int = 0
-    email_reply_count: int = 0
-    email_click_count: int = 0
+    email_open_count: Optional[int] = 0
+    email_reply_count: Optional[int] = 0
+    email_click_count: Optional[int] = 0
     company_domain: Optional[str] = None
     status_summary: Optional[LeadStatusSummary] = None
     payload: Optional[Dict[str, Any]] = None
@@ -134,7 +134,7 @@ class Lead(BaseModel):
     list_id: Optional[UUID] = None
     last_contacted_from: Optional[str] = None
     uploaded_by_user: Optional[UUID] = None
-    upload_method: str
+    upload_method: Optional[str] = None
     assigned_to: Optional[UUID] = None
     is_website_visitor: Optional[bool] = None
     timestamp_last_touch: Optional[datetime] = None
