@@ -3,6 +3,14 @@ from datetime import datetime
 
 if TYPE_CHECKING:
     from ..client import InstantlyClient
+from ..models.lead import (
+    Lead, LeadStatusSummary, LeadStatusSummarySubseq,
+    LeadCreateRequest, LeadUpdateRequest, LeadMergeRequest,
+    LeadInterestStatusRequest, LeadSubsequenceRemoveRequest,
+    LeadBulkAssignRequest, LeadMoveRequest, LeadExportRequest,
+    LeadSubsequenceMoveRequest, ListLeadsRequest,
+    BulkAssignLeadsResult, MoveLeadsResult, ExportLeadsResult
+)
 
 
 class LeadAPI:
@@ -11,31 +19,35 @@ class LeadAPI:
     def __init__(self, client: "InstantlyClient"):
         self.client = client
 
-    def create_lead(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def create_lead(self, data: LeadCreateRequest) -> Lead:
         """
         Create a new lead.
 
         Args:
-            data: Lead data including required fields like email, first_name, last_name, etc.
+            data: Lead creation data including required fields like email
 
         Returns:
-            Dict containing the created lead data
+            Lead object containing the created lead data
         """
-        return self.client.post("/api/v2/leads", json=data)
+        response = self.client.post("/api/v2/leads", json=data.model_dump(exclude_none=True))
+        return Lead.parse_obj(response)
 
-    def list_leads(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def list_leads(self, params: Optional[ListLeadsRequest] = None) -> List[Lead]:
         """
         List leads with optional filtering.
 
         Args:
-            params: Optional query parameters for filtering and pagination
+            params: Optional filtering parameters for the leads list
 
         Returns:
-            Dict containing the list of leads and pagination info
+            List of Lead objects
         """
-        return self.client.get("/api/v2/leads", params=params)
+        if params is None:
+            params = ListLeadsRequest()
+        response = self.client.get("/api/v2/leads", params=params.model_dump(exclude_none=True))
+        return [Lead.parse_obj(item) for item in response.get("items", [])]
 
-    def get_lead(self, lead_id: str) -> Dict[str, Any]:
+    def get_lead(self, lead_id: str) -> Lead:
         """
         Get a specific lead by ID.
 
@@ -43,11 +55,12 @@ class LeadAPI:
             lead_id: The unique identifier of the lead
 
         Returns:
-            Dict containing the lead data
+            Lead object containing the lead data
         """
-        return self.client.get(f"/api/v2/leads/{lead_id}")
+        response = self.client.get(f"/api/v2/leads/{lead_id}")
+        return Lead.parse_obj(response)
 
-    def update_lead(self, lead_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    def update_lead(self, lead_id: str, data: LeadUpdateRequest) -> Lead:
         """
         Update a lead's information.
 
@@ -56,9 +69,10 @@ class LeadAPI:
             data: The updated lead data
 
         Returns:
-            Dict containing the updated lead data
+            Lead object containing the updated lead data
         """
-        return self.client.patch(f"/api/v2/leads/{lead_id}", json=data)
+        response = self.client.patch(f"/api/v2/leads/{lead_id}", json=data.model_dump(exclude_none=True))
+        return Lead.parse_obj(response)
 
     def delete_lead(self, lead_id: str) -> None:
         """
@@ -69,119 +83,93 @@ class LeadAPI:
         """
         self.client.delete(f"/api/v2/leads/{lead_id}")
 
-    def merge_leads(self, primary_lead_id: str, secondary_lead_id: str) -> Dict[str, Any]:
+    def merge_leads(self, data: LeadMergeRequest) -> Lead:
         """
         Merge two leads, keeping the primary lead's data.
 
         Args:
-            primary_lead_id: The ID of the lead to keep
-            secondary_lead_id: The ID of the lead to merge into the primary
+            data: The merge request data containing primary and secondary lead IDs
 
         Returns:
-            Dict containing the merged lead data
+            Lead object containing the merged lead data
         """
-        data = {
-            "primary_lead_id": primary_lead_id,
-            "secondary_lead_id": secondary_lead_id
-        }
-        return self.client.post("/api/v2/leads/merge", json=data)
+        response = self.client.post("/api/v2/leads/merge", json=data.model_dump())
+        return Lead.parse_obj(response)
 
-    def update_interest_status(self, lead_id: str, status: int) -> Dict[str, Any]:
+    def update_interest_status(self, data: LeadInterestStatusRequest) -> Lead:
         """
         Update the interest status of a lead.
 
         Args:
-            lead_id: The unique identifier of the lead
-            status: The new interest status (1: Interested, 2: Not Interested, 3: Maybe Later)
+            data: The interest status update request data
 
         Returns:
-            Dict containing the updated lead data
+            Lead object containing the updated lead data
         """
-        data = {
-            "lead_id": lead_id,
-            "status": status
-        }
-        return self.client.post("/api/v2/leads/update-interest-status", json=data)
+        response = self.client.post("/api/v2/leads/update-interest-status", json=data.model_dump())
+        return Lead.parse_obj(response)
 
-    def remove_from_subsequence(self, lead_id: str) -> Dict[str, Any]:
+    def remove_from_subsequence(self, data: LeadSubsequenceRemoveRequest) -> Lead:
         """
         Remove a lead from a subsequence.
 
         Args:
-            lead_id: The unique identifier of the lead
+            data: The subsequence removal request data
 
         Returns:
-            Dict containing the updated lead data
+            Lead object containing the updated lead data
         """
-        data = {"lead_id": lead_id}
-        return self.client.post("/api/v2/leads/subsequence/remove", json=data)
+        response = self.client.post("/api/v2/leads/subsequence/remove", json=data.model_dump())
+        return Lead.parse_obj(response)
 
-    def bulk_assign_leads(self, lead_ids: List[str], user_id: str) -> Dict[str, Any]:
+    def bulk_assign_leads(self, data: LeadBulkAssignRequest) -> BulkAssignLeadsResult:
         """
         Bulk assign leads to organization users.
 
         Args:
-            lead_ids: List of lead IDs to assign
-            user_id: The ID of the user to assign the leads to
+            data: The bulk assignment request data
 
         Returns:
             Dict containing the assignment results
         """
-        data = {
-            "lead_ids": lead_ids,
-            "user_id": user_id
-        }
-        return self.client.post("/api/v2/leads/bulk-assign", json=data)
+        response = self.client.post("/api/v2/leads/bulk-assign", json=data.model_dump())
+        return BulkAssignLeadsResult.model_validate(response)
 
-    def move_leads(self, lead_ids: List[str], target_id: str, target_type: str) -> Dict[str, Any]:
+    def move_leads(self, data: LeadMoveRequest) -> MoveLeadsResult:
         """
         Move leads to a campaign or list.
 
         Args:
-            lead_ids: List of lead IDs to move
-            target_id: The ID of the target campaign or list
-            target_type: The type of target ('campaign' or 'list')
+            data: The move request data
 
         Returns:
             Dict containing the move results
         """
-        data = {
-            "lead_ids": lead_ids,
-            "target_id": target_id,
-            "target_type": target_type
-        }
-        return self.client.post("/api/v2/leads/move", json=data)
+        response = self.client.post("/api/v2/leads/move", json=data.model_dump())
+        return MoveLeadsResult.model_validate(response)
 
-    def export_leads(self, lead_ids: List[str], app_id: str) -> Dict[str, Any]:
+    def export_leads(self, data: LeadExportRequest) -> ExportLeadsResult:
         """
         Export leads to an external app.
 
         Args:
-            lead_ids: List of lead IDs to export
-            app_id: The ID of the external app to export to
+            data: The export request data
 
         Returns:
             Dict containing the export results
         """
-        data = {
-            "lead_ids": lead_ids,
-            "app_id": app_id
-        }
-        return self.client.post("/api/v2/leads/export", json=data)
+        response = self.client.post("/api/v2/leads/export", json=data.model_dump())
+        return ExportLeadsResult.model_validate(response)
 
-    def move_to_subsequence(self, lead_id: str, subsequence_id: str) -> Dict[str, Any]:
+    def move_to_subsequence(self, data: LeadSubsequenceMoveRequest) -> Lead:
         """
         Move a lead to a subsequence.
 
         Args:
-            lead_id: The unique identifier of the lead
-            subsequence_id: The ID of the subsequence to move the lead to
+            data: The subsequence move request data
 
         Returns:
-            Dict containing the updated lead data
+            Lead object containing the updated lead data
         """
-        data = {
-            "lead_id": lead_id,
-            "subsequence_id": subsequence_id
-        }
-        return self.client.post("/api/v2/leads/subsequence/move", json=data) 
+        response = self.client.post("/api/v2/leads/subsequence/move", json=data.model_dump())
+        return Lead.parse_obj(response) 

@@ -40,7 +40,11 @@ pytest
 from instantly import InstantlyClient, InstantlyConfig
 
 # Initialize the client
-config = InstantlyConfig(api_key="your-api-key")
+config = InstantlyConfig(
+    api_key="your-api-key",
+    base_url="https://api.instantly.ai",  # Optional: defaults to production API URL
+    timeout=30  # Optional: defaults to 30 seconds
+)
 client = InstantlyClient(config)
 
 # List all accounts
