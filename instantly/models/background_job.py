@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Optional, Dict, Any, Literal
 from uuid import UUID
 
-from pydantic import Field
+from pydantic import Field, field_serializer
 
 from .base import InstantlyModel
 
@@ -29,4 +29,10 @@ class BackgroundJob(InstantlyModel):
     status: Literal["pending", "in-progress", "success", "failed"] = Field(
         ..., 
         description="Current status of the job"
-    ) 
+    )
+
+    @field_serializer("workspace_id", "user_id", "entity_id", mode="plain")
+    def serialize_uuid(self, v: Optional[UUID]):
+        if v is None:
+            return None
+        return str(v) 

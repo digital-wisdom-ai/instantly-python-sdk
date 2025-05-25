@@ -6,6 +6,11 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 from ..client import InstantlyClient
+from ..models.email import (
+    EmailUpdate, Email, EmailReplyResponse, 
+    EmailListResponse, UnreadCountResponse, 
+    MarkAsReadResponse
+)
 
 class EmailAPI:
     """Email API endpoints."""
@@ -15,7 +20,7 @@ class EmailAPI:
 
     def reply(self, thread_id: str, subject: str, body: str, to_address: str, 
               cc_address: Optional[str] = None, bcc_address: Optional[str] = None,
-              reply_to: Optional[str] = None) -> Dict[str, Any]:
+              reply_to: Optional[str] = None) -> EmailReplyResponse:
         """
         Reply to an email thread.
 
@@ -29,7 +34,7 @@ class EmailAPI:
             reply_to: Optional reply-to email address
 
         Returns:
-            Dict containing the created email details
+            EmailReplyResponse containing the created email details
         """
         data = {
             "thread_id": thread_id,
@@ -44,9 +49,10 @@ class EmailAPI:
         if reply_to:
             data["reply_to"] = reply_to
 
-        return self._client.post("/emails/reply", json=data)
+        response = self._client.post("/emails/reply", json=data)
+        return EmailReplyResponse(**response)
 
-    def list_emails(self, page: int = 1, per_page: int = 50) -> Dict[str, Any]:
+    def list_emails(self, page: int = 1, per_page: int = 50) -> EmailListResponse:
         """
         List emails.
 
@@ -55,12 +61,13 @@ class EmailAPI:
             per_page: Number of items per page
 
         Returns:
-            Dict containing list of emails and pagination info
+            EmailListResponse containing list of emails and pagination info
         """
         params = {"page": page, "per_page": per_page}
-        return self._client.get("/emails", params=params)
+        response = self._client.get("/emails", params=params)
+        return EmailListResponse(**response)
 
-    def get_email(self, email_id: str) -> Dict[str, Any]:
+    def get_email(self, email_id: str) -> Email:
         """
         Get a specific email by ID.
 
@@ -68,45 +75,45 @@ class EmailAPI:
             email_id: The ID of the email to retrieve
 
         Returns:
-            Dict containing email details
+            Email object containing email details
         """
-        return self._client.get(f"/emails/{email_id}")
+        response = self._client.get(f"/emails/{email_id}")
+        return Email(**response)
 
-    def update_email(self, email_id: str, **kwargs) -> Dict[str, Any]:
+    def update_email(self, email_id: str, data: EmailUpdate) -> Email:
         """
         Update an email's properties.
 
         Args:
             email_id: The ID of the email to update
-            **kwargs: Fields to update (subject, body, etc.)
+            data: EmailUpdate model containing the fields to update
 
         Returns:
-            Dict containing updated email details
+            Email object containing updated email details
         """
-        return self._client.patch(f"/emails/{email_id}", json=kwargs)
+        response = self._client.patch(f"/emails/{email_id}", json=data.model_dump(exclude_none=True))
+        return Email(**response)
 
-    def delete_email(self, email_id: str) -> Dict[str, Any]:
+    def delete_email(self, email_id: str) -> None:
         """
         Delete an email.
 
         Args:
             email_id: The ID of the email to delete
-
-        Returns:
-            Dict containing success status
         """
-        return self._client.delete(f"/emails/{email_id}")
+        self._client.delete(f"/emails/{email_id}")
 
-    def get_unread_count(self) -> Dict[str, int]:
+    def get_unread_count(self) -> UnreadCountResponse:
         """
         Get count of unread emails.
 
         Returns:
-            Dict containing count of unread emails
+            UnreadCountResponse containing count of unread emails
         """
-        return self._client.get("/emails/unread/count")
+        response = self._client.get("/emails/unread/count")
+        return UnreadCountResponse(**response)
 
-    def mark_thread_as_read(self, thread_id: str) -> Dict[str, bool]:
+    def mark_thread_as_read(self, thread_id: str) -> MarkAsReadResponse:
         """
         Mark all emails in a thread as read.
 
@@ -114,6 +121,7 @@ class EmailAPI:
             thread_id: The ID of the thread to mark as read
 
         Returns:
-            Dict containing success status
+            MarkAsReadResponse containing success status
         """
-        return self._client.post(f"/emails/threads/{thread_id}/mark-as-read") 
+        response = self._client.post(f"/emails/threads/{thread_id}/mark-as-read")
+        return MarkAsReadResponse(**response) 

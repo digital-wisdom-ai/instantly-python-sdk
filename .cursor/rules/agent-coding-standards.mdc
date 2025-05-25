@@ -1,0 +1,27 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+## Follow Clean Code principles (Robert C. Martin) when writing code
+
+- Specifically the correct order of functions
+
+## Be very wary of comments!
+
+- Most likely there is absolutely no reason to add a comment
+- If there is, it indicates that the code is not well written
+
+## Don't use dicts unless required
+
+- Use pydantic models instead, where appropriate
+
+## Do not guess/hallucinate
+
+- If you are not sure, ask the user
+- If you don't know the library, do the research
+
+## Only essential complexity, not accidental
+
+- Question whether each line adds value or just complexity

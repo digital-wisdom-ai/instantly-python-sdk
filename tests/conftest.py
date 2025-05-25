@@ -4,6 +4,7 @@ Test configuration and fixtures
 
 import pytest
 from uuid import uuid4
+from datetime import datetime
 
 from instantly import InstantlyClient, InstantlyConfig
 
@@ -26,13 +27,15 @@ def account_data():
     """Sample account data for testing."""
     return {
         "id": "acc_123",
-        "name": "Test Account",
         "email": "test@example.com",
-        "status": "active",
+        "first_name": "John",
+        "last_name": "Doe",
+        "status": 1,
         "plan": "pro",
         "timezone": "UTC",
-        "created_at": "2024-01-01T00:00:00Z",
-        "updated_at": "2024-01-02T00:00:00Z",
+        "timestamp_created": "2024-01-01T00:00:00Z",
+        "timestamp_updated": "2024-01-02T00:00:00Z",
+        "organization_id": "org_123"
     }
 
 @pytest.fixture
@@ -41,23 +44,31 @@ def campaign_data():
     return {
         "id": "camp_123",
         "name": "Test Campaign",
-        "status": "active",
-        "schedule": {
-            "timezone": "UTC",
-            "start_time": "09:00",
-            "end_time": "17:00",
-            "days": [1, 2, 3, 4, 5],
-            "max_emails_per_day": 100
-        },
-        "email_list_id": "list_123",
-        "sequence_id": "seq_123",
+        "email_gap": 10,
+        "random_wait_max": 10,
+        "text_only": False,
+        "email_list": ["test@example.com"],
         "daily_limit": 100,
         "stop_on_reply": True,
-        "stop_on_auto_reply": True,
+        "email_tag_list": ["tag_123"],
         "link_tracking": True,
         "open_tracking": True,
-        "created_at": "2024-01-01T00:00:00Z",
-        "updated_at": "2024-01-02T00:00:00Z"
+        "stop_on_auto_reply": True,
+        "daily_max_leads": 100,
+        "prioritize_new_leads": False,
+        "auto_variant_select": {
+            "trigger": "click_rate"
+        },
+        "match_lead_esp": False,
+        "stop_for_company": False,
+        "insert_unsubscribe_header": False,
+        "allow_risky_contacts": False,
+        "disable_bounce_protect": False,
+        "cc_list": ["cc@example.com"],
+        "bcc_list": ["bcc@example.com"],
+        "timestamp_created": "2024-01-01T00:00:00Z",
+        "timestamp_updated": "2024-01-02T00:00:00Z",
+        "organization_id": "org_123"
     }
 
 @pytest.fixture
@@ -78,8 +89,9 @@ def lead_data():
         "email_click_count": 0,
         "campaign": "camp_123",
         "list_id": "list_123",
-        "created_at": "2024-01-01T00:00:00Z",
-        "updated_at": "2024-01-02T00:00:00Z"
+        "timestamp_created": "2024-01-01T00:00:00Z",
+        "timestamp_updated": "2024-01-02T00:00:00Z",
+        "organization_id": "org_123"
     }
 
 @pytest.fixture
@@ -95,8 +107,9 @@ def background_job_data():
         "data": {},
         "progress": 0,
         "status": "pending",
-        "created_at": "2024-01-01T00:00:00Z",
-        "updated_at": "2024-01-02T00:00:00Z"
+        "timestamp_created": "2024-01-01T00:00:00Z",
+        "timestamp_updated": "2024-01-02T00:00:00Z",
+        "organization_id": "org_123"
     }
 
 @pytest.fixture
@@ -109,8 +122,9 @@ def custom_tag_data():
         "color": "#FF0000",
         "description": "Test description",
         "resource_ids": [str(uuid4())],
-        "created_at": "2024-01-01T00:00:00Z",
-        "updated_at": "2024-01-02T00:00:00Z"
+        "timestamp_created": "2024-01-01T00:00:00Z",
+        "timestamp_updated": "2024-01-02T00:00:00Z",
+        "organization_id": "org_123"
     }
 
 @pytest.fixture
@@ -123,8 +137,9 @@ def block_list_entry_data():
         "value": "test@example.com",
         "reason": "Test reason",
         "expires_at": "2024-12-31T00:00:00Z",
-        "created_at": "2024-01-01T00:00:00Z",
-        "updated_at": "2024-01-02T00:00:00Z"
+        "timestamp_created": "2024-01-01T00:00:00Z",
+        "timestamp_updated": "2024-01-02T00:00:00Z",
+        "organization_id": "org_123"
     }
 
 @pytest.fixture
@@ -136,8 +151,9 @@ def lead_label_data():
         "name": "Test Label",
         "color": "#00FF00",
         "description": "Test description",
-        "created_at": "2024-01-01T00:00:00Z",
-        "updated_at": "2024-01-02T00:00:00Z"
+        "timestamp_created": "2024-01-01T00:00:00Z",
+        "timestamp_updated": "2024-01-02T00:00:00Z",
+        "organization_id": "org_123"
     }
 
 @pytest.fixture
@@ -151,8 +167,9 @@ def api_key_data():
         "scopes": ["read", "write"],
         "expires_at": "2024-12-31T00:00:00Z",
         "last_used_at": "2024-01-02T00:00:00Z",
-        "created_at": "2024-01-01T00:00:00Z",
-        "updated_at": "2024-01-02T00:00:00Z"
+        "timestamp_created": "2024-01-01T00:00:00Z",
+        "timestamp_updated": "2024-01-02T00:00:00Z",
+        "organization_id": "org_123"
     }
 
 @pytest.fixture
@@ -165,6 +182,7 @@ def account_campaign_mapping_data():
         "campaign_id": str(uuid4()),
         "is_active": True,
         "last_used_at": "2024-01-02T00:00:00Z",
-        "created_at": "2024-01-01T00:00:00Z",
-        "updated_at": "2024-01-02T00:00:00Z"
+        "timestamp_created": "2024-01-01T00:00:00Z",
+        "timestamp_updated": "2024-01-02T00:00:00Z",
+        "organization_id": "org_123"
     } 

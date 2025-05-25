@@ -63,7 +63,7 @@ class CampaignAPI:
         Returns:
             The created campaign
         """
-        response = self._client.post("/campaigns", json=campaign.model_dump(by_alias=True))
+        response = self._client.post("/campaigns", json=campaign.model_dump(exclude_none=True, by_alias=True))
         return Campaign.model_validate(response)
         
     def update_campaign(self, campaign_id: str, campaign: CampaignUpdate) -> Campaign:
@@ -79,7 +79,7 @@ class CampaignAPI:
         """
         response = self._client.put(
             f"/campaigns/{campaign_id}",
-            json=campaign.model_dump(by_alias=True, exclude_unset=True),
+            json=campaign.model_dump(exclude_none=True, by_alias=True, exclude_unset=True),
         )
         return Campaign.model_validate(response)
         

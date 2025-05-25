@@ -4,7 +4,7 @@ Tests for the Lead API
 
 import pytest
 from datetime import datetime
-from uuid import UUID
+from uuid import UUID, uuid4
 from instantly.models.lead import (
     LeadCreateRequest, LeadUpdateRequest, LeadMergeRequest,
     LeadInterestStatusRequest, LeadSubsequenceRemoveRequest,
@@ -13,6 +13,16 @@ from instantly.models.lead import (
     BulkAssignLeadsResult, MoveLeadsResult, ExportLeadsResult,
     Lead
 )
+
+# Test UUIDs
+TEST_WORKSPACE_ID = uuid4()
+TEST_CAMPAIGN_ID = uuid4()
+TEST_LIST_ID = uuid4()
+TEST_USER_ID = uuid4()
+TEST_LEAD_ID = uuid4()
+TEST_SECONDARY_LEAD_ID = uuid4()
+TEST_SUBSEQUENCE_ID = uuid4()
+TEST_APP_ID = uuid4()
 
 def test_create_lead(client):
     """Test creating a new lead."""
@@ -23,7 +33,9 @@ def test_create_lead(client):
         company_name="New Company",
         company_domain="newcompany.com",
         phone="+1987654321",
-        website="https://newcompany.com"
+        website="https://newcompany.com",
+        campaign=TEST_CAMPAIGN_ID,
+        list_id=TEST_LIST_ID
     )
     
     try:
@@ -32,6 +44,8 @@ def test_create_lead(client):
         assert lead.email == lead_data.email
         assert lead.first_name == lead_data.first_name
         assert lead.last_name == lead_data.last_name
+        assert lead.campaign == TEST_CAMPAIGN_ID
+        assert lead.list_id == TEST_LIST_ID
     except Exception as e:
         # The mock server might not support POST, so we'll just check the error
         assert isinstance(e, Exception)
@@ -39,7 +53,12 @@ def test_create_lead(client):
 def test_list_leads(client, lead_data):
     """Test listing leads."""
     try:
-        leads = client.leads.list_leads()
+        list_request = ListLeadsRequest(
+            campaign=TEST_CAMPAIGN_ID,
+            list_id=TEST_LIST_ID,
+            assigned_to=TEST_USER_ID
+        )
+        leads = client.leads.list_leads(list_request)
         assert isinstance(leads, list)
         assert all(isinstance(lead, Lead) for lead in leads)
         if leads:  # If the mock server returns any leads
@@ -68,15 +87,17 @@ def test_update_lead(client):
     update_data = LeadUpdateRequest(
         first_name="Updated",
         last_name="Name",
-        company_name="Updated Company"
+        company_name="Updated Company",
+        assigned_to=TEST_USER_ID
     )
     
     try:
-        lead = client.leads.update_lead("lead_123", update_data)
+        lead = client.leads.update_lead(TEST_LEAD_ID, update_data)
         assert isinstance(lead, Lead)
         assert lead.first_name == update_data.first_name
         assert lead.last_name == update_data.last_name
         assert lead.company_name == update_data.company_name
+        assert lead.assigned_to == TEST_USER_ID
     except Exception as e:
         # The mock server might not support PATCH, so we'll just check the error
         assert isinstance(e, Exception)
@@ -131,14 +152,14 @@ def test_bulk_assign_leads(client):
     """Test bulk assigning leads."""
     try:
         assign_data = LeadBulkAssignRequest(
-            lead_ids=["lead_123", "lead_456"],
-            user_id="user_123"
+            lead_ids=[str(TEST_LEAD_ID), str(TEST_SECONDARY_LEAD_ID)],
+            user_id=str(TEST_USER_ID)
         )
         result = client.leads.bulk_assign_leads(assign_data)
         assert isinstance(result, BulkAssignLeadsResult)
         assert result.assigned_count == 2
-        assert result.user_id == UUID("user_123")
-        assert result.lead_ids == ["lead_123", "lead_456"]
+        assert result.user_id == TEST_USER_ID
+        assert result.lead_ids == [str(TEST_LEAD_ID), str(TEST_SECONDARY_LEAD_ID)]
     except Exception as e:
         # The mock server might not support POST, so we'll just check the error
         assert isinstance(e, Exception)
@@ -147,16 +168,16 @@ def test_move_leads(client):
     """Test moving leads to a campaign or list."""
     try:
         move_data = LeadMoveRequest(
-            lead_ids=["lead_123", "lead_456"],
-            target_id="camp_123",
+            lead_ids=[str(TEST_LEAD_ID), str(TEST_SECONDARY_LEAD_ID)],
+            target_id=str(TEST_CAMPAIGN_ID),
             target_type="campaign"
         )
         result = client.leads.move_leads(move_data)
         assert isinstance(result, MoveLeadsResult)
         assert result.moved_count == 2
-        assert result.target_id == UUID("camp_123")
+        assert result.target_id == TEST_CAMPAIGN_ID
         assert result.target_type == "campaign"
-        assert result.lead_ids == ["lead_123", "lead_456"]
+        assert result.lead_ids == [str(TEST_LEAD_ID), str(TEST_SECONDARY_LEAD_ID)]
     except Exception as e:
         # The mock server might not support POST, so we'll just check the error
         assert isinstance(e, Exception)

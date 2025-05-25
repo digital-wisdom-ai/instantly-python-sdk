@@ -63,7 +63,7 @@ class AccountAPI:
         Returns:
             The created account
         """
-        response = self._client.post("/api/v2/accounts", json=account.model_dump(by_alias=True))
+        response = self._client.post("/api/v2/accounts", json=account.model_dump(exclude_none=True, by_alias=True))
         return Account.model_validate(response)
         
     def update_account(self, account_id: str, account: AccountUpdate) -> Account:
@@ -79,7 +79,7 @@ class AccountAPI:
         """
         response = self._client.put(
             f"/api/v2/accounts/{account_id}",
-            json=account.model_dump(by_alias=True, exclude_unset=True),
+            json=account.model_dump(exclude_none=True, by_alias=True, exclude_unset=True),
         )
         return Account.model_validate(response)
         

@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Optional, Literal
 from uuid import UUID
 
-from pydantic import Field
+from pydantic import Field, field_serializer
 
 from .base import InstantlyModel
 
@@ -17,4 +17,10 @@ class BlockListEntry(InstantlyModel):
     type: Literal["email", "domain"] = Field(..., description="The type of block list entry")
     value: str = Field(..., description="The email or domain to block")
     reason: Optional[str] = Field(None, description="Optional reason for blocking")
-    expires_at: Optional[datetime] = Field(None, description="Optional expiration date for the block") 
+    expires_at: Optional[datetime] = Field(None, description="Optional expiration date for the block")
+
+    @field_serializer("workspace_id", mode="plain")
+    def serialize_uuid(self, v: Optional[UUID]):
+        if v is None:
+            return None
+        return str(v) 
