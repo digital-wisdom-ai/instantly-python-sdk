@@ -14,6 +14,8 @@ class LeadStatusSummarySubseq(BaseModel):
     timestamp_executed: datetime
 
 class ListLeadsRequest(BaseModel):
+    model_config = ConfigDict(validate_by_name=True)
+
     limit: Optional[int] = Field(default=100, ge=1, le=100)
     starting_after: Optional[str] = None
     campaign: Optional[UUID] = None
@@ -36,7 +38,15 @@ class ListLeadsRequest(BaseModel):
         description="0: In Queue, 1: Google, 2: Microsoft, 3: Zoho, 9: Yahoo, 10: Yandex, 12: Web.de, 13: Libero.it, 999: Other, 1000: Not Found"
     )
 
+    @field_serializer("campaign", "list_id", "assigned_to", "uploaded_by_user", mode="plain")
+    def serialize_uuid(cls, v: Optional[UUID]):
+        if v is None:
+            return None
+        return str(v)
+
 class LeadCreateRequest(BaseModel):
+    model_config = ConfigDict(validate_by_name=True)
+
     email: EmailStr
     first_name: Optional[str] = None
     last_name: Optional[str] = None
@@ -48,7 +58,15 @@ class LeadCreateRequest(BaseModel):
     campaign: Optional[UUID] = None
     list_id: Optional[UUID] = None
 
+    @field_serializer("campaign", "list_id", mode="plain")
+    def serialize_uuid(cls, v: Optional[UUID]):
+        if v is None:
+            return None
+        return str(v)
+
 class LeadUpdateRequest(BaseModel):
+    model_config = ConfigDict(validate_by_name=True)
+
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     company_name: Optional[str] = None
@@ -60,31 +78,51 @@ class LeadUpdateRequest(BaseModel):
     pl_value_lead: Optional[str] = None
     custom_variables: Optional[Dict[str, Any]] = None
 
+    @field_serializer("assigned_to", mode="plain")
+    def serialize_uuid(cls, v: Optional[UUID]):
+        if v is None:
+            return None
+        return str(v)
+
 class LeadMergeRequest(BaseModel):
+    model_config = ConfigDict(validate_by_name=True)
+
     primary_lead_id: str
     secondary_lead_id: str
 
 class LeadInterestStatusRequest(BaseModel):
+    model_config = ConfigDict(validate_by_name=True)
+
     lead_id: str
     status: Literal[1, 2, 3] = Field(description="1: Interested, 2: Not Interested, 3: Maybe Later")
 
 class LeadSubsequenceRemoveRequest(BaseModel):
+    model_config = ConfigDict(validate_by_name=True)
+
     lead_id: str
 
 class LeadBulkAssignRequest(BaseModel):
+    model_config = ConfigDict(validate_by_name=True)
+
     lead_ids: List[str]
     user_id: str
 
 class LeadMoveRequest(BaseModel):
+    model_config = ConfigDict(validate_by_name=True)
+
     lead_ids: List[str]
     target_id: str
     target_type: Literal["campaign", "list"]
 
 class LeadExportRequest(BaseModel):
+    model_config = ConfigDict(validate_by_name=True)
+
     lead_ids: List[str]
     app_id: str
 
 class LeadSubsequenceMoveRequest(BaseModel):
+    model_config = ConfigDict(validate_by_name=True)
+
     lead_id: str
     subsequence_id: str
 
@@ -158,6 +196,12 @@ class BulkAssignLeadsResult(BaseModel):
     user_id: UUID
     lead_ids: List[str]
 
+    @field_serializer("user_id", mode="plain")
+    def serialize_uuid(cls, v: Optional[UUID]):
+        if v is None:
+            return None
+        return str(v)
+
 class MoveLeadsResult(BaseModel):
     model_config = ConfigDict(validate_by_name=True)
     moved_count: int
@@ -165,6 +209,12 @@ class MoveLeadsResult(BaseModel):
     target_type: Literal["campaign", "list"]
     lead_ids: List[str]
     job_id: Optional[str] = None  # background job id if async
+
+    @field_serializer("target_id", mode="plain")
+    def serialize_uuid(cls, v: Optional[UUID]):
+        if v is None:
+            return None
+        return str(v)
 
 class ExportLeadsResult(BaseModel):
     model_config = ConfigDict(validate_by_name=True)
