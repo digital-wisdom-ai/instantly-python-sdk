@@ -93,7 +93,7 @@ class LeadAPI:
         Returns:
             Lead object containing the merged lead data
         """
-        response = self.client.post("/api/v2/leads/merge", json=data.model_dump())
+        response = self.client.post("/api/v2/leads/merge", json=data.model_dump(exclude_none=True))
         return Lead.parse_obj(response)
 
     def update_interest_status(self, data: LeadInterestStatusRequest) -> Lead:
@@ -106,7 +106,7 @@ class LeadAPI:
         Returns:
             Lead object containing the updated lead data
         """
-        response = self.client.post("/api/v2/leads/update-interest-status", json=data.model_dump())
+        response = self.client.post("/api/v2/leads/update-interest-status", json=data.model_dump(exclude_none=True))
         return Lead.parse_obj(response)
 
     def remove_from_subsequence(self, data: LeadSubsequenceRemoveRequest) -> Lead:
@@ -119,7 +119,7 @@ class LeadAPI:
         Returns:
             Lead object containing the updated lead data
         """
-        response = self.client.post("/api/v2/leads/subsequence/remove", json=data.model_dump())
+        response = self.client.post("/api/v2/leads/subsequence/remove", json=data.model_dump(exclude_none=True))
         return Lead.parse_obj(response)
 
     def bulk_assign_leads(self, data: LeadBulkAssignRequest) -> BulkAssignLeadsResult:
@@ -132,7 +132,7 @@ class LeadAPI:
         Returns:
             Dict containing the assignment results
         """
-        response = self.client.post("/api/v2/leads/bulk-assign", json=data.model_dump())
+        response = self.client.post("/api/v2/leads/bulk-assign", json=data.model_dump(exclude_none=True))
         return BulkAssignLeadsResult.model_validate(response)
 
     def move_leads(self, data: LeadMoveRequest) -> MoveLeadsResult:
@@ -145,7 +145,7 @@ class LeadAPI:
         Returns:
             Dict containing the move results
         """
-        response = self.client.post("/api/v2/leads/move", json=data.model_dump())
+        response = self.client.post("/api/v2/leads/move", json=data.model_dump(exclude_none=True))
         return MoveLeadsResult.model_validate(response)
 
     def export_leads(self, data: LeadExportRequest) -> ExportLeadsResult:
@@ -158,7 +158,7 @@ class LeadAPI:
         Returns:
             Dict containing the export results
         """
-        response = self.client.post("/api/v2/leads/export", json=data.model_dump())
+        response = self.client.post("/api/v2/leads/export", json=data.model_dump(exclude_none=True))
         return ExportLeadsResult.model_validate(response)
 
     def move_to_subsequence(self, data: LeadSubsequenceMoveRequest) -> Lead:
@@ -171,5 +171,5 @@ class LeadAPI:
         Returns:
             Lead object containing the updated lead data
         """
-        response = self.client.post("/api/v2/leads/subsequence/move", json=data.model_dump())
+        response = self.client.post("/api/v2/leads/subsequence/move", json=data.model_dump(exclude_none=True))
         return Lead.parse_obj(response) 
