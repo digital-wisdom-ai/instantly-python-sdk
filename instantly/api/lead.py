@@ -44,7 +44,7 @@ class LeadAPI:
         """
         if params is None:
             params = ListLeadsRequest()
-        response = self.client.get("/api/v2/leads", params=params.model_dump(exclude_none=True))
+        response = self.client.post("/leads/list", json=params.model_dump(exclude_none=True))
         return [Lead.parse_obj(item) for item in response.get("items", [])]
 
     def get_lead(self, lead_id: str) -> Lead:
